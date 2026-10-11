@@ -646,8 +646,8 @@ textarea.form-area{resize:vertical;min-height:70px;line-height:1.6}
   <div class="menu-group open">
     <div class="menu-group-head" onclick="toggleGroup(this)"><span class="mi">🛰️</span>监管总览<span class="arrow">▾</span></div>
     <div class="menu-sub">
-      <div class="menu-item active" data-page="dashboard" onclick="switchPage('dashboard',this)">监管一张图</div>
-      <div class="menu-item" data-page="stats-board" onclick="switchPage('stats-board',this)">数据看板</div>
+      <div class="menu-item active" data-page="dashboard" onclick="openScreen('dashboard')">监管一张图<span class="tag tag-cyan" style="margin-left:6px">新窗口</span></div>
+      <div class="menu-item" data-page="stats-board" onclick="openScreen('stats-board')">数据看板<span class="tag tag-cyan" style="margin-left:6px">新窗口</span></div>
     </div>
   </div>
   <div class="menu-group open">
@@ -4430,6 +4430,20 @@ function switchPage(pageId, el){
   }
   window.scrollTo(0,0);
   try{ history.replaceState(null,'','?page='+pageId); }catch(e){}
+}
+
+// 打开独立数据大屏（新窗口）
+function openScreen(name){
+  var items = document.querySelectorAll('.menu-item');
+  for(var i=0;i<items.length;i++){ items[i].classList.remove('active'); }
+  var el = document.querySelector('.menu-item[data-page="'+name+'"]');
+  if(el){
+    el.classList.add('active');
+    var g = el.closest('.menu-group');
+    if(g) g.classList.add('open');
+  }
+  var file = (name === 'dashboard') ? 'screen-dashboard.html' : 'screen-statsboard.html';
+  window.open(file, '_blank');
 }
 
 // 弹窗
