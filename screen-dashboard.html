@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>植保无人机全域监管指挥大屏 · 高邮市农业农村局</title>
+<style>
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:#f0f2f5;color:#333;font-size:14px;overflow-y:auto}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:#c3ccd9;border-radius:4px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ===== 顶栏 ===== */
+.app-header{height:56px;background:linear-gradient(135deg,#1a3a6e 0%,#0d2752 100%);display:flex;align-items:center;justify-content:space-between;padding:0 20px;position:fixed;top:0;left:0;right:0;z-index:900;box-shadow:0 2px 10px rgba(13,39,82,.35)}
+.header-left{display:flex;align-items:center;gap:12px}
+.header-logo{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,#0082D9,#27ae60);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 0 1px rgba(255,255,255,.25)}
+.header-title{color:#fff;font-size:18px;font-weight:700;letter-spacing:1px}
+.header-sub{color:rgba(255,255,255,.55);font-size:12px;margin-top:2px;letter-spacing:2px}
+.header-right{display:flex;align-items:center;gap:14px}
+.env-tag{background:rgba(39,174,96,.25);border:1px solid rgba(39,174,96,.5);color:#7fe3a8;font-size:11px;padding:2px 10px;border-radius:10px}
+.header-date{color:rgba(255,255,255,.7);font-size:12px}
+.msg-btn-wrap{position:relative}
+.msg-btn{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;font-size:16px;color:#fff}
+.msg-btn:hover{background:rgba(255,255,255,.2)}
+.msg-badge{position:absolute;top:-5px;right:-5px;background:#e74c3c;color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;box-shadow:0 2px 6px rgba(231,76,60,.5)}
+.user-chip{display:flex;align-items:center;gap:10px;cursor:pointer;padding:4px 8px;border-radius:8px}
+.user-chip:hover{background:rgba(255,255,255,.1)}
+.user-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#0082D9,#00c48c);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700}
+.user-name{color:#fff;font-size:13px}
+.user-role{color:rgba(255,255,255,.5);font-size:11px}
+.header-ai-btn{height:36px;padding:0 16px;border-radius:8px;background:linear-gradient(135deg,#9b59b6,#5f4de0);border:none;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.header-ai-btn:hover{filter:brightness(1.15)}
+
+/* ===== 消息下拉 ===== */
+.msg-panel{position:fixed;top:60px;right:96px;width:400px;background:#fff;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.15);display:none;z-index:950;overflow:hidden}
+.msg-panel.show{display:block}
+.msg-panel::before{content:"";position:absolute;top:-6px;right:26px;width:12px;height:12px;background:#fff;transform:rotate(45deg)}
+.msg-tabs{display:flex;border-bottom:1px solid #f0f0f0}
+.msg-tab{flex:1;text-align:center;padding:12px 0;font-size:13px;color:#666;cursor:pointer;position:relative}
+.msg-tab.active{color:#0082D9;font-weight:600}
+.msg-tab.active::after{content:"";position:absolute;left:30%;right:30%;bottom:0;height:2px;background:#0082D9;border-radius:2px}
+.msg-list{max-height:340px;overflow-y:auto}
+.msg-item{display:flex;gap:10px;padding:12px 16px;border-bottom:1px solid #f7f8fa;cursor:pointer}
+.msg-item:hover{background:#f8fbff}
+.msg-item .m-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.msg-item .m-title{font-size:13px;color:#222;font-weight:600;display:flex;align-items:center;gap:6px}
+.msg-item .m-desc{font-size:12px;color:#888;margin-top:3px;line-height:1.5}
+.msg-item .m-time{font-size:11px;color:#aaa;margin-top:3px}
+.m-dot{width:6px;height:6px;border-radius:50%;background:#e74c3c;flex-shrink:0}
+.msg-footer{text-align:center;padding:10px 0;color:#0082D9;font-size:12px;cursor:pointer}
+
+/* ===== 侧边菜单 ===== */
+.side-menu{position:fixed;top:56px;left:0;bottom:0;width:224px;background:linear-gradient(180deg,#10294f 0%,#0d2752 60%,#0b2245 100%);overflow-y:auto;z-index:800;padding:8px 0 30px}
+.side-menu::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15)}
+.menu-group{margin-bottom:2px}
+.menu-group-head{display:flex;align-items:center;gap:10px;padding:12px 18px;color:#aebfd8;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;user-select:none}
+.menu-group-head:hover{color:#fff;background:rgba(255,255,255,.05)}
+.menu-group-head .mi{font-size:16px;width:20px;text-align:center}
+.menu-group-head .arrow{margin-left:auto;font-size:11px;transition:transform .2s;color:#6b80a3}
+.menu-group.open .menu-group-head .arrow{transform:rotate(180deg)}
+.menu-sub{display:none;padding:2px 0 6px}
+.menu-group.open .menu-sub{display:block}
+.menu-item{padding:9px 18px 9px 48px;color:#8fa5c5;font-size:13px;cursor:pointer;position:relative;transition:.2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.menu-item::before{content:"";position:absolute;left:32px;top:50%;transform:translateY(-50%);width:4px;height:4px;border-radius:50%;background:#415a80}
+.menu-item:hover{color:#fff;background:rgba(255,255,255,.06)}
+.menu-item.active{color:#fff;background:linear-gradient(90deg,rgba(0,130,217,.35),rgba(0,130,217,.08))}
+.menu-item.active::before{content:"";width:5px;height:5px;background:#00d4ff;box-shadow:0 0 6px #00d4ff;top:50%}
+.menu-item.active::after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#0082D9,#00c48c)}
+.menu-count{background:rgba(231,76,60,.9);color:#fff;font-size:10px;padding:0 6px;border-radius:8px;margin-left:6px}
+
+/* ===== 主区域 ===== */
+.main-area{margin-left:224px;margin-top:56px;padding:16px 20px 30px;min-height:calc(100vh - 56px)}
+.page{display:none}
+.page.show{display:block}
+.page-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.page-title{font-size:19px;font-weight:700;color:#12263f}
+.breadcrumb{font-size:12px;color:#98a6b8;margin-top:4px}
+.breadcrumb b{color:#0082D9;font-weight:600}
+.page-actions{display:flex;gap:8px;align-items:center}
+
+/* ===== 卡片 ===== */
+.card{background:#fff;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.05);overflow:hidden}
+.card+.card{margin-top:14px}
+.card-header{display:flex;justify-content:space-between;align-items:center;padding:13px 18px;border-bottom:1px solid #f0f2f5}
+.card-header .title{font-size:15px;font-weight:700;color:#1a3a6e;display:flex;align-items:center;gap:8px}
+.card-header .dot{width:4px;height:15px;background:#0082D9;border-radius:2px}
+.card-header .more{font-size:12px;color:#0082D9;cursor:pointer}
+.card-body{padding:16px 18px}
+.card-body.nopad{padding:0}
+
+/* ===== 统计卡 ===== */
+.quick-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.qs-item{background:#fff;border-radius:10px;padding:14px 16px;box-shadow:0 2px 8px rgba(0,0,0,.05);display:flex;gap:12px;align-items:center;cursor:pointer;transition:.2s;border:1px solid transparent}
+.qs-item:hover{border-color:rgba(0,130,217,.35);box-shadow:0 4px 14px rgba(0,130,217,.12);transform:translateY(-1px)}
+.qs-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0}
+.qs-val{font-size:24px;font-weight:800;color:#12263f;font-family:Arial,sans-serif;line-height:1.1}
+.qs-val small{font-size:12px;font-weight:500;color:#8a97a8;margin-left:2px}
+.qs-label{font-size:12px;color:#8a97a8;margin-top:3px}
+.qs-trend{font-size:11px;margin-top:2px}
+.up{color:#27ae60}.down-red{color:#e74c3c}
+
+/* ===== 筛选条 ===== */
+.filter-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:13px 18px;background:#fff;border-radius:10px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.filter-item{display:flex;align-items:center;gap:6px;font-size:13px;color:#667}
+.filter-item .f-label{color:#7a8798;white-space:nowrap}
+input.search-input,select.sel,input.form-input,textarea.form-area{border:1px solid #dde3ec;border-radius:7px;padding:7px 11px;font-size:13px;color:#333;outline:none;background:#fff;font-family:inherit;transition:.15s}
+input.search-input,select.sel{width:170px}
+input.search-input:focus,select.sel:focus,input.form-input:focus,textarea.form-area:focus{border-color:#0082D9;box-shadow:0 0 0 3px rgba(0,130,217,.1)}
+.filter-spacer{flex:1}
+
+/* ===== 按钮 ===== */
+.btn{border:none;border-radius:7px;padding:8px 16px;font-size:13px;cursor:pointer;transition:.15s;font-family:inherit;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:#0082D9;color:#fff}
+.btn-primary:hover{background:#0070be}
+.btn-success{background:#27ae60;color:#fff}
+.btn-success:hover{background:#229754}
+.btn-danger{background:#e74c3c;color:#fff}
+.btn-danger:hover{background:#d33a2a}
+.btn-warn{background:#ff9f43;color:#fff}
+.btn-warn:hover{background:#f08d28}
+.btn-purple{background:#9b59b6;color:#fff}
+.btn-purple:hover{background:#8748a1}
+.btn-outline{background:#fff;color:#0082D9;border:1px solid #0082D9}
+.btn-outline:hover{background:rgba(0,130,217,.07)}
+.btn-gray{background:#f1f3f7;color:#5a6a7d;border:1px solid #e2e7ee}
+.btn-gray:hover{background:#e7ebf1}
+.btn-sm{padding:4px 10px;font-size:12px;border-radius:6px}
+
+/* ===== 表格 ===== */
+.table-wrap{overflow-x:auto}
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{background:#f7f9fc;color:#5c6b80;font-weight:600;padding:11px 12px;text-align:left;white-space:nowrap;border-bottom:1px solid #eef1f6}
+.data-table td{padding:11px 12px;border-bottom:1px solid #f3f5f9;color:#33445e;vertical-align:middle}
+.data-table tbody tr:hover{background:#f6faff}
+.data-table .sub-line{font-size:11px;color:#98a6b8;margin-top:2px}
+.cell-strong{font-weight:600;color:#12263f}
+.op-btn{color:#0082D9;background:none;border:none;font-size:12px;cursor:pointer;padding:2px 4px;font-family:inherit}
+.op-btn:hover{text-decoration:underline}
+.op-btn.danger{color:#e74c3c}
+.op-btn.warn{color:#ff9f43}
+.op-btn+.op-btn{margin-left:8px}
+.avatar-sm{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;margin-right:8px;vertical-align:middle}
+.a-blue{background:#4d9eff}.a-green{background:#2ba84a}.a-org{background:#ff9f43}.a-purple{background:#9b59b6}.a-cyan{background:#00b8d4}.a-red{background:#e74c3c}.a-navy{background:#3d5a80}.a-pink{background:#e84393}
+
+/* ===== 徽章 ===== */
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 9px;border-radius:10px;white-space:nowrap;line-height:1.6}
+.tag::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
+.tag-success{background:#e8f8f0;color:#27ae60}
+.tag-warn{background:#fff5e8;color:#e8871e}
+.tag-danger{background:#fdeceb;color:#e74c3c}
+.tag-info{background:#e8f3fd;color:#0082D9}
+.tag-gray{background:#f0f2f5;color:#7a8798}
+.tag-purple{background:#f4ecfa;color:#9b59b6}
+.tag-cyan{background:#e4f7fa;color:#00a3bd}
+
+/* ===== 进度条 ===== */
+.progress{height:8px;background:#edf1f6;border-radius:5px;overflow:hidden;min-width:90px}
+.progress .bar{height:100%;border-radius:5px;background:linear-gradient(90deg,#0082D9,#00c48c)}
+.progress .bar.warn{background:linear-gradient(90deg,#ffab3d,#ff9f43)}
+.progress .bar.danger{background:linear-gradient(90deg,#ff7b6b,#e74c3c)}
+.progress-wrap{display:flex;align-items:center;gap:8px}
+.progress-wrap .ptxt{font-size:12px;color:#5c6b80;min-width:34px}
+
+/* ===== Tabs ===== */
+.tabs{display:flex;gap:2px;border-bottom:2px solid #eef1f6;margin-bottom:14px}
+.tab-item{padding:9px 18px;font-size:13px;color:#7a8798;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s;white-space:nowrap}
+.tab-item:hover{color:#0082D9}
+.tab-item.active{color:#0082D9;font-weight:700;border-bottom-color:#0082D9}
+.tab-pane{display:none}
+.tab-pane.show{display:block}
+.sub-tabs{display:flex;gap:8px;margin-bottom:12px}
+.sub-tab{padding:5px 14px;border-radius:15px;font-size:12px;background:#f1f4f8;color:#66788f;cursor:pointer}
+.sub-tab.active{background:#0082D9;color:#fff}
+
+/* ===== 详情字段 ===== */
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px 20px}
+.info-grid.cols-2{grid-template-columns:repeat(2,1fr)}
+.info-item .i-label{font-size:12px;color:#8a97a8;margin-bottom:3px}
+.info-item .i-value{font-size:13px;color:#22364f;font-weight:500;word-break:break-all;line-height:1.5}
+.info-item .i-value.link{color:#0082D9;cursor:pointer}
+.section-title{font-size:14px;font-weight:700;color:#1a3a6e;margin:18px 0 12px;display:flex;align-items:center;gap:8px}
+.section-title::before{content:"";width:4px;height:14px;background:#0082D9;border-radius:2px}
+.section-title .st-sub{font-size:11px;color:#98a6b8;font-weight:400;margin-left:6px}
+
+/* ===== 时间线 ===== */
+.timeline{position:relative;padding-left:24px}
+.timeline::before{content:"";position:absolute;left:7px;top:8px;bottom:8px;width:2px;background:#e4e9f1}
+.tl-item{position:relative;padding-bottom:18px}
+.tl-item:last-child{padding-bottom:2px}
+.tl-dot{position:absolute;left:-24px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid #c4d3e8;z-index:1}
+.tl-item.done .tl-dot{border-color:#27ae60;background:#e8f8f0}
+.tl-item.doing .tl-dot{border-color:#0082D9;background:#e8f3fd;box-shadow:0 0 0 4px rgba(0,130,217,.15)}
+.tl-item.error .tl-dot{border-color:#e74c3c;background:#fdeceb}
+.tl-title{font-size:13px;font-weight:700;color:#22364f;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tl-time{font-size:11px;color:#98a6b8;font-weight:400}
+.tl-desc{font-size:12px;color:#7a8798;margin-top:4px;line-height:1.7}
+.tl-desc .tl-tag{display:inline-block;background:#eef3fa;color:#3d6a99;font-size:11px;padding:1px 8px;border-radius:4px;margin:2px 4px 2px 0}
+
+/* ===== 步骤条（横向） ===== */
+.steps{display:flex;margin:6px 0 16px}
+.step{flex:1;text-align:center;position:relative}
+.step::before{content:"";position:absolute;top:13px;left:-50%;width:100%;height:2px;background:#e4e9f1}
+.step:first-child::before{display:none}
+.step .s-dot{width:28px;height:28px;border-radius:50%;background:#eef1f6;color:#98a6b8;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;position:relative;z-index:1;border:2px solid #e4e9f1}
+.step .s-name{font-size:12px;color:#7a8798;margin-top:6px}
+.step.done .s-dot{background:#27ae60;border-color:#27ae60;color:#fff}
+.step.done .s-name{color:#27ae60;font-weight:600}
+.step.doing .s-dot{background:#0082D9;border-color:#0082D9;color:#fff;box-shadow:0 0 0 5px rgba(0,130,217,.15)}
+.step.doing .s-name{color:#0082D9;font-weight:600}
+.step.done::before{background:#27ae60}
+.step.doing::before{background:linear-gradient(90deg,#27ae60 50%,#e4e9f1 50%)}
+
+/* ===== 弹窗 ===== */
+.modal-mask{position:fixed;inset:0;background:rgba(10,22,40,.5);z-index:1000;display:none;align-items:flex-start;justify-content:center;overflow-y:auto;padding:40px 20px;backdrop-filter:blur(2px)}
+.modal-mask.show{display:flex}
+.modal{background:#fff;border-radius:12px;width:640px;max-width:96vw;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;display:flex;flex-direction:column;margin:auto}
+.modal.lg{width:900px}
+.modal.md{width:760px}
+.modal.sm{width:480px}
+.modal-header{display:flex;justify-content:space-between;align-items:center;padding:15px 20px;background:linear-gradient(135deg,#f4f8fd,#fff);border-bottom:1px solid #eef1f6}
+.modal-title{font-size:16px;font-weight:700;color:#1a3a6e;display:flex;align-items:center;gap:8px}
+.modal-title .mt-icon{font-size:17px}
+.modal-close{width:30px;height:30px;border:none;background:transparent;border-radius:7px;font-size:15px;color:#8a97a8;cursor:pointer}
+.modal-close:hover{background:#f1f3f7;color:#e74c3c}
+.modal-body{padding:18px 20px;overflow-y:auto;flex:1}
+.modal-footer{padding:13px 20px;border-top:1px solid #eef1f6;display:flex;justify-content:flex-end;gap:10px;background:#fafbfd}
+.modal-footer .mf-tip{margin-right:auto;font-size:12px;color:#98a6b8;align-self:center}
+
+/* ===== 表单 ===== */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px}
+.form-item .f-label{font-size:12px;color:#5c6b80;margin-bottom:5px;display:flex;align-items:center;gap:4px}
+.form-item .f-label .req{color:#e74c3c}
+.form-item input.form-input,.form-item select.sel,.form-item textarea.form-area,.form-item .form-input{width:100%}
+textarea.form-area{resize:vertical;min-height:70px;line-height:1.6}
+.form-item.full{grid-column:1/-1}
+.radio-group{display:flex;gap:16px;align-items:center;flex-wrap:wrap;font-size:13px;color:#44566f}
+.radio-group label{display:flex;align-items:center;gap:5px;cursor:pointer}
+.form-tip{font-size:11px;color:#98a6b8;margin-top:4px;line-height:1.5}
+
+/* ===== 分页 ===== */
+.pagination{display:flex;justify-content:space-between;align-items:center;padding:13px 18px;font-size:12px;color:#8a97a8}
+.page-btns{display:flex;gap:5px}
+.p-btn{min-width:28px;height:28px;border:1px solid #e2e7ee;background:#fff;border-radius:6px;font-size:12px;color:#5c6b80;cursor:pointer;padding:0 8px}
+.p-btn.active{background:#0082D9;color:#fff;border-color:#0082D9}
+.p-btn:hover:not(.active){border-color:#0082D9;color:#0082D9}
+
+/* ===== 两栏布局 ===== */
+.two-col{display:flex;gap:14px;align-items:stretch}
+.two-col>.col{flex:1;min-width:0}
+.two-col>.col.w330{width:390px;flex:0 0 390px}
+.two-col>.col.w450{width:450px;flex:0 0 450px}
+.chart-row{display:flex;gap:14px;margin-bottom:14px;align-items:stretch}
+.chart-row>.card{flex:1;margin-top:0}
+
+/* ===== 地图 ===== */
+.map-wrap{position:relative;background:#0e2440;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.map-svg{display:block;width:100%;height:auto}
+.map-toolbar{position:absolute;top:12px;right:12px;background:rgba(8,20,38,.82);border:1px solid rgba(0,212,255,.2);border-radius:9px;padding:10px 13px;backdrop-filter:blur(4px);z-index:5}
+.layer-check{display:flex;align-items:center;gap:7px;color:#c8d6e5;font-size:12px;padding:3px 0;cursor:pointer;user-select:none}
+.layer-check input{accent-color:#00d4ff;cursor:pointer}
+.map-legend{position:absolute;left:12px;bottom:12px;background:rgba(8,20,38,.82);border:1px solid rgba(0,212,255,.2);border-radius:9px;padding:10px 13px;backdrop-filter:blur(4px);z-index:5;display:flex;gap:14px;flex-wrap:wrap}
+.lg-item{display:flex;align-items:center;gap:6px;color:#c8d6e5;font-size:11px;white-space:nowrap}
+.lg-dot{width:10px;height:10px;border-radius:3px}
+.map-stat{position:absolute;top:12px;left:12px;display:flex;gap:8px;z-index:5}
+.ms-chip{background:rgba(8,20,38,.82);border:1px solid rgba(0,212,255,.2);border-radius:9px;padding:8px 14px;color:#c8d6e5;font-size:11px;backdrop-filter:blur(4px)}
+.ms-chip b{font-size:18px;color:#00d4ff;font-family:Arial;display:block;line-height:1.2}
+.ms-chip b.green{color:#2ee6a6}.ms-chip b.orange{color:#ffb35c}.ms-chip b.red{color:#ff6b5c}
+.pulse{animation:pulseDot 1.6s infinite}
+@keyframes pulseDot{0%{opacity:1}50%{opacity:.35}100%{opacity:1}}
+.radar-sweep{transform-origin:center;animation:sweep 4s linear infinite}
+@keyframes sweep{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.uav-move{animation:uavFly 12s linear infinite}
+@keyframes uavFly{from{offset-distance:0%}to{offset-distance:100%}}
+
+/* ===== 图表通用 ===== */
+.chart-box{position:relative}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:180px;padding:0 4px}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end}
+.bar-col .b-value{font-size:10px;color:#8a97a8}
+.bar-col .bar2{width:70%;max-width:34px;border-radius:4px 4px 0 0;background:linear-gradient(180deg,#4d9eff,#0082D9);min-height:3px;transition:.3s;cursor:pointer}
+.bar-col .bar2:hover{filter:brightness(1.2)}
+.bar-col .b-label{font-size:11px;color:#7a8798;margin-top:4px}
+.bar-col .bar2.green{background:linear-gradient(180deg,#3ddc97,#27ae60)}
+.bar-col .bar2.orange{background:linear-gradient(180deg,#ffc06b,#ff9f43)}
+.bar-col .bar2.purple{background:linear-gradient(180deg,#b98cd6,#9b59b6)}
+.hbar-list .hb-item{margin-bottom:12px}
+.hb-row{display:flex;justify-content:space-between;font-size:12px;color:#5c6b80;margin-bottom:5px}
+.hb-row b{color:#12263f}
+.hb-track{height:9px;background:#eef1f6;border-radius:5px;overflow:hidden}
+.hb-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#0082D9,#00c48c)}
+.hb-fill.orange{background:linear-gradient(90deg,#ffab3d,#ff9f43)}
+.hb-fill.purple{background:linear-gradient(90deg,#9b59b6,#b98cd6)}
+.legend-inline{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:#7a8798}
+.legend-inline .lg{display:flex;align-items:center;gap:5px}
+.legend-inline .sw{width:10px;height:10px;border-radius:3px}
+
+/* ===== 预警高亮卡 ===== */
+.alarm-hot{background:linear-gradient(135deg,#fff5f4,#ffe9e6);border:1px solid #ffd0c9;border-radius:12px;padding:16px 18px;margin-bottom:14px}
+.alarm-hot .ah-head{display:flex;align-items:center;gap:10px}
+.ah-badge{background:#e74c3c;color:#fff;font-size:12px;font-weight:700;padding:3px 12px;border-radius:8px;display:flex;align-items:center;gap:5px}
+.ah-title{font-size:15px;font-weight:700;color:#c0392b}
+.ah-time{margin-left:auto;font-size:12px;color:#c08a80}
+.ah-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+.ah-cell{background:rgba(255,255,255,.75);border-radius:8px;padding:9px 12px}
+.ah-cell .c-label{font-size:11px;color:#b08579}
+.ah-cell .c-value{font-size:14px;font-weight:700;color:#8e2f24;margin-top:2px}
+
+/* ===== 企业卡片 ===== */
+.ent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.ent-card{background:#fff;border-radius:10px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.05);border:1px solid transparent;transition:.2s}
+.ent-card:hover{border-color:rgba(0,130,217,.35);box-shadow:0 4px 16px rgba(0,130,217,.1)}
+.ent-head{display:flex;gap:12px;align-items:center}
+.ent-logo{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:19px;font-weight:800;flex-shrink:0}
+.ent-name{font-size:14px;font-weight:700;color:#12263f}
+.ent-meta{font-size:11px;color:#98a6b8;margin-top:3px}
+.ent-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:13px 0;padding:10px 0;border-top:1px dashed #edf0f4;border-bottom:1px dashed #edf0f4}
+.ent-stats .es-item{text-align:center}
+.ent-stats .es-v{font-size:17px;font-weight:800;color:#1a3a6e;font-family:Arial}
+.ent-stats .es-l{font-size:10px;color:#98a6b8;margin-top:2px}
+.rate-star{color:#ff9f43;font-size:12px;letter-spacing:1px}
+.ent-foot{display:flex;justify-content:space-between;align-items:center}
+.credit-badge{font-size:12px;font-weight:800;padding:2px 10px;border-radius:7px}
+.cb-a{background:#e8f8f0;color:#1e9e5a}.cb-b{background:#e8f3fd;color:#0082D9}.cb-c{background:#fff5e8;color:#e8871e}
+
+/* ===== 课程卡片 ===== */
+.course-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.course-card{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05);border:1px solid #eef1f6;transition:.2s}
+.course-cover{height:110px;position:relative;display:flex;align-items:center;justify-content:center;font-size:34px;color:rgba(255,255,255,.9)}
+.course-cover .cc-tag{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.35);color:#fff;font-size:11px;padding:2px 10px;border-radius:10px;backdrop-filter:blur(3px)}
+.course-cover .cc-hour{position:absolute;bottom:8px;right:10px;background:rgba(0,0,0,.4);color:#fff;font-size:11px;padding:1px 8px;border-radius:4px}
+.course-info{padding:12px 14px}
+.course-name{font-size:14px;font-weight:700;color:#12263f;line-height:1.4}
+.course-desc{font-size:12px;color:#8a97a8;margin-top:5px;line-height:1.5;height:36px;overflow:hidden}
+.course-meta{display:flex;gap:12px;font-size:11px;color:#98a6b8;margin-top:8px;align-items:center}
+.course-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px dashed #edf0f4}
+
+/* ===== 聊天AI ===== */
+.chat-wrap{display:flex;flex-direction:column;gap:12px}
+.chat-bubble{max-width:80%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.7}
+.chat-ai{background:#f0f6ff;color:#2c4a6e;border-top-left-radius:3px;align-self:flex-start;white-space:pre-line}
+.chat-user{background:linear-gradient(135deg,#0082D9,#00a3e0);color:#fff;border-top-right-radius:3px;align-self:flex-end}
+.chat-role{font-size:10px;color:#98a6b8;margin-bottom:3px}
+.chat-input-row{display:flex;gap:8px;margin-top:6px}
+.chat-input-row input{flex:1}
+.ai-chips{display:flex;gap:8px;flex-wrap:wrap}
+.ai-chip{background:#eef3fa;color:#3d6a99;font-size:12px;padding:4px 12px;border-radius:14px;cursor:pointer;transition:.15s}
+.ai-chip:hover{background:#0082D9;color:#fff}
+
+/* ===== 空状态 / 提示 ===== */
+.tip-bar{display:flex;gap:8px;align-items:flex-start;background:#f0f7ff;border:1px solid #d6e9fb;color:#3d6a99;font-size:12px;border-radius:8px;padding:10px 14px;line-height:1.7;margin-bottom:14px}
+.tip-bar.warn{background:#fffaf0;border-color:#fdeccb;color:#a06e1b}
+.tip-bar .tb-icon{font-size:14px}
+.empty-tip{padding:30px;text-align:center;color:#98a6b8;font-size:13px}
+
+/* 档案完整性 */
+.integrity{display:flex;align-items:center;gap:6px}
+.integrity .ring{width:30px;height:30px}
+.kpi-ring{display:inline-block;position:relative;text-align:center}
+.kpi-ring .kr-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:17px;font-weight:800;color:#12263f;font-family:Arial}
+
+/* 认证比对图 */
+.face-compare{display:grid;grid-template-columns:1fr 60px 1fr 1fr;gap:10px;align-items:center;margin:12px 0}
+.fc-box{background:#f7f9fc;border:1px solid #e8edf4;border-radius:10px;padding:10px;text-align:center}
+.fc-img{height:130px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:40px;margin-bottom:8px;background:linear-gradient(135deg,#e3edf7,#d5e5f2);position:relative;overflow:hidden}
+.fc-img.cam{background:linear-gradient(135deg,#d4ecdd,#c3e5cf)}
+.fc-num{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.4);color:#fff;font-size:10px;padding:2px 7px;border-radius:4px}
+.fc-label{font-size:12px;color:#5c6b80;font-weight:600}
+.fc-sub{font-size:11px;color:#98a6b8;margin-top:3px}
+.vs-mark{font-size:20px;font-weight:800;color:#c4d3e8;text-align:center}
+
+/* 键值列表 */
+.kv-list{border:1px solid #eef1f6;border-radius:10px;overflow:hidden}
+.kv-row{display:flex;border-bottom:1px solid #f3f5f9}
+.kv-row:last-child{border-bottom:none}
+.kv-row .k{width:130px;background:#f8fafc;color:#7a8798;font-size:12px;padding:9px 14px;flex-shrink:0}
+.kv-row .v{flex:1;padding:9px 14px;font-size:13px;color:#33445e}
+
+/* 复选行 */
+.check-line{display:flex;align-items:center;gap:8px;font-size:13px;color:#44566f;padding:6px 0;cursor:pointer}
+.check-line input{accent-color:#0082D9;width:15px;height:15px;cursor:pointer}
+
+/* 独立大屏：沉浸式全屏暗色 */
+body.standalone-screen{background:#060e20 !important;margin:0;min-height:100vh}
+.standalone-screen .page{display:block !important}
+.standalone-screen .screen-page{min-height:100vh}
+
+/* 监管大屏：地图占满更高 */
+.standalone-screen .map-wrap{box-shadow:0 0 30px rgba(0,140,255,.25);border:1px solid rgba(0,212,255,.25)}
+
+</style>
+</head>
+<body class="standalone-screen">
+<div class="page show screen-page" id="page-dashboard">
+  <!-- 大屏顶部品牌栏 -->
+  <div class="screen-top">
+    <div class="screen-brand">
+      <div class="sb-icon">🚁</div>
+      <div>
+        <div class="sb-title">植保无人机全域监管指挥大屏</div>
+        <div class="sb-sub">高邮市农业农村局 · 科技赋能空域管控 · 构建安全有序低空环境</div>
+      </div>
+    </div>
+    <div class="screen-info">
+      <span class="si-chip"><b class="green pulse-dot">●</b>在线设备 <b class="cyan">10/12</b></span>
+      <span class="si-chip"><b class="pulse-dot red">●</b>待处置预警 <b class="red">1</b></span>
+      <span class="si-chip">作业中 <b class="green">3</b></span>
+      <span class="si-chip">📅 <span class="screen-date">--</span> &nbsp; 🕐 <span class="screen-clock">--:--:--</span></span>
+    </div>
+  </div>
+
+  <div class="page-head">
+    <div>
+      <div class="page-title">监管一张图 · 全域态势</div>
+      <div class="breadcrumb">监管总览 / <b>监管一张图</b> ｜ 感知设备分布 · 禁飞区范围 · 报警事件 · 无人机实时位置，全域可视、全局可控、全程可溯</div>
+    </div>
+    <div class="page-actions">
+      <button class="btn btn-outline" onclick="openModal('m-map-help')">🗺️ 制图说明</button>
+      <button class="btn btn-primary" onclick="switchPage('alarm')">🚨 进入预警处置</button>
+    </div>
+  </div>
+
+  <!-- KPI 指标带 -->
+  <div class="quick-stats">
+    <div class="qs-item" onclick="switchPage('progress')">
+      <div class="qs-icon" style="background:#e8f8f0">🛫</div>
+      <div style="flex:1;min-width:0">
+        <div class="qs-val">12<small> 目标</small></div>
+        <div class="qs-label">当前在飞目标</div>
+        <div class="qs-trend up">▲ 较昨日 +3</div>
+      </div>
+      <div style="flex:none;width:72px">
+        <svg class="spark green" viewBox="0 0 72 28" width="72" height="28"><path class="sa" d="M3,20 L14,17 L25,21 L36,15 L47,11 L58,7 L69,4 L69,28 L3,28 Z"/><path class="sl" d="M3,20 L14,17 L25,21 L36,15 L47,11 L58,7 L69,4"/><circle class="dot" cx="69" cy="4" r="2.4"/></svg>
+      </div>
+    </div>
+    <div class="qs-item" onclick="switchPage('sensor')">
+      <div class="qs-icon" style="background:#e8f3fd">📡</div>
+      <div style="flex:1;min-width:0">
+        <div class="qs-val">10<small>/12 台</small></div>
+        <div class="qs-label">感知设备在线</div>
+        <div class="qs-trend up">▲ 覆盖率 78.5%</div>
+      </div>
+      <div style="flex:none;width:72px">
+        <svg class="spark" viewBox="0 0 72 28" preserveAspectRatio="none"><polygon class="sa" points="2,20 14,14 26,18 38,10 50,12 62,6 70,5 70,28 2,28"/><path class="sl" d="M2,20 L14,14 L26,18 L38,10 L50,12 L62,6 L70,5"/><circle class="dot" cx="70" cy="5" r="2.4"/></svg>
+      </div>
+    </div>
+    <div class="qs-item" onclick="switchPage('alarm')">
+      <div class="qs-icon glow-red">🚨</div>
+      <div style="flex:1;min-width:0">
+        <div class="qs-val red">3<small> 起</small></div>
+        <div class="qs-label">今日空域预警</div>
+        <div class="qs-trend down-red">▲ 较昨日 +2 <span class="pulse-dot"></span></div>
+      </div>
+      <div style="flex:none;width:72px">
+        <svg class="spark orange" viewBox="0 0 72 28" preserveAspectRatio="none"><polygon points="2,24 14,22 26,23 38,18 50,12 62,10 70,9 70,28 2,28"/><path class="sl" d="M2,24 L14,22 L26,23 L38,18 L50,12 L62,10 L70,9"/><circle class="dot" cx="70" cy="9" r="2.4"/></svg>
+      </div>
+    </div>
+    <div class="qs-item" onclick="switchPage('report')">
+      <div class="qs-icon" style="background:#e8f8f0">🌾</div>
+      <div style="flex:1;min-width:0">
+        <div class="qs-val">4,860<small> 亩</small></div>
+        <div class="qs-label">今日报备作业面积</div>
+        <div class="qs-trend up">▲ 同比 +18.6%</div>
+      </div>
+      <div style="flex:none;width:72px">
+        <svg class="spark green" viewBox="0 0 72 28" preserveAspectRatio="none"><polygon points="2,22 14,18 26,16 38,19 50,9 62,11 70,7 70,28 2,28"/><path class="sl" d="M2,22 L14,18 L26,16 L38,19 L50,9 L62,11 L70,7"/><circle class="dot" cx="70" cy="7" r="2.4"/></svg>
+      </div>
+    </div>
+    <div class="qs-item" onclick="switchPage('taskmap')">
+      <div class="qs-icon" style="background:#fff5e8">🗺️</div>
+      <div style="flex:1;min-width:0">
+        <div class="qs-val">28<small> 任务</small></div>
+        <div class="qs-label">今日报备任务</div>
+        <div class="qs-trend up">▲ 作业中 3 · 待作业 21</div>
+      </div>
+      <div style="flex:none;width:72px">
+        <svg class="spark orange" viewBox="0 0 72 28" preserveAspectRatio="none"><polygon points="2,23 14,20 26,21 38,14 50,13 62,9 70,7 70,28 2,28"/><path class="sl" d="M2,23 L14,20 L26,21 L38,14 L50,13 L62,9 L70,7"/><circle class="dot" cx="70" cy="7" r="2.4"/></svg>
+      </div>
+    </div>
+    <div class="qs-item" onclick="openModal('m-ai')">
+      <div class="qs-icon" style="background:#f4ecfa">✅</div>
+      <div style="flex:1;min-width:0">
+        <div class="qs-val">98.7<small>%</small></div>
+        <div class="qs-label">综合作业合规率</div>
+        <div class="qs-trend up">▲ 环比 +0.3%</div>
+      </div>
+      <div style="flex:none;width:72px">
+        <svg class="spark" viewBox="0 0 72 28" preserveAspectRatio="none"><polygon points="2,14 14,13 26,14 38,10 50,11 62,8 70,6 70,28 2,28"/><path class="sl" d="M2,14 L14,13 L26,14 L38,10 L50,11 L62,8 L70,6"/><circle class="dot" cx="70" cy="6" r="2.4"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- 实时播报跑马灯 -->
+  <div class="screen-ticker">
+    <span class="tk-label">🔔 实时播报</span>
+    <div class="tk-viewport">
+      <div class="tk-inner">
+        <span>09:18 <b>连淮扬镇铁路沿线禁飞区闯入</b>，多旋翼 DJI_12A3B7 · 高度150m，已下发处置工单 GD-20261011-01，铁路派出所处置中</span>
+        <span>09:22 <em>铁路沿线管控预案</em>已同步公安 / 铁路派出所 / 应急局 3 家联动单位</span>
+        <span>08:12 张建国 <em>人脸认证通过</em>（人员 96.8% / 证件 98.2% / 任务一致），三垛·稻飞虱防治任务已解锁作业</span>
+        <span>08:30 证件临期预警：绿农飞防合作社 <b>5 台设备三责险</b> 15 天内到期，已推送催办</span>
+        <span>10-17 大运河半程马拉松赛段 <em>临时禁飞</em>待生效（06:00-14:00），报备校验已联动</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="col">
+      <div class="map-wrap" style="box-shadow:0 0 30px rgba(0,140,255,.25);border:1px solid rgba(0,212,255,.25)">
+        <svg class="map-svg" viewBox="0 0 980 600" xmlns="http://www.w3.org/2000/svg">
+          <!-- 底图网格 -->
+          <rect width="980" height="600" fill="#0e2440"/>
+          <g stroke="#18304f" stroke-width="1">
+            <line x1="0" y1="75" x2="980" y2="75"/><line x1="0" y1="150" x2="980" y2="150"/><line x1="0" y1="225" x2="980" y2="225"/><line x1="0" y1="300" x2="980" y2="300"/><line x1="0" y1="375" x2="980" y2="375"/><line x1="0" y1="450" x2="980" y2="450"/><line x1="0" y1="525" x2="980" y2="525"/>
+            <line x1="122" y1="0" x2="122" y2="600"/><line x1="244" y1="0" x2="244" y2="600"/><line x1="366" y1="0" x2="366" y2="600"/><line x1="488" y1="0" x2="488" y2="600"/><line x1="610" y1="0" x2="610" y2="600"/><line x1="732" y1="0" x2="732" y2="600"/><line x1="854" y1="0" x2="854" y2="600"/>
+          </g>
+          <!-- 市域轮廓 -->
+          <path d="M150,40 L320,25 L470,55 L600,50 L720,80 L790,150 L830,240 L810,340 L740,430 L640,470 L560,560 L430,575 L330,540 L260,500 L200,480 L150,430 L120,350 L100,260 L110,150 Z" fill="rgba(20,60,105,.55)" stroke="#2a6db5" stroke-width="2"/>
+          <!-- 高邮湖 -->
+          <path d="M170,80 C240,60 300,90 320,140 C340,190 310,230 280,250 C240,275 190,260 165,220 C145,185 135,110 170,80 Z" fill="#1a4a7a" opacity=".9"/>
+          <text x="235" y="165" fill="#6fb6e8" font-size="15" text-anchor="middle">高邮湖</text>
+          <text x="235" y="186" fill="#5b9bd5" font-size="10" text-anchor="middle">饮用水水源保护区</text>
+          <!-- 京杭大运河 -->
+          <path d="M335,20 C345,120 325,220 360,320 C390,410 355,500 375,580" fill="none" stroke="#2a6db5" stroke-width="5" opacity=".85"/>
+          <text x="318" y="90" fill="#6fa8dc" font-size="10" transform="rotate(80 318,90)">京杭大运河</text>
+          <!-- 连淮扬镇铁路 -->
+          <path d="M470,25 C480,160 450,300 490,440 C510,510 500,560 505,580" fill="none" stroke="#d8b46e" stroke-width="3" stroke-dasharray="10 6"/>
+          <text x="447" y="120" fill="#d8b46e" font-size="10" transform="rotate(83 447,120)">连淮扬镇铁路</text>
+          <!-- 宁启铁路 -->
+          <path d="M150,510 C300,495 450,505 640,485 C720,478 780,462 810,445" fill="none" stroke="#d8b46e" stroke-width="3" stroke-dasharray="10 6"/>
+          <text x="620" y="468" fill="#d8b46e" font-size="10">宁启铁路</text>
+          <!-- 禁飞区图层 -->
+          <g id="layer-nofly">
+            <circle cx="245" cy="165" r="72" fill="rgba(231,76,60,.13)" stroke="#ff6b5c" stroke-width="2" stroke-dasharray="6 4"/>
+            <circle cx="470" cy="180" r="55" fill="rgba(231,76,60,.13)" stroke="#ff6b5c" stroke-width="2" stroke-dasharray="6 4"/>
+            <circle cx="430" cy="392" r="45" fill="rgba(231,76,60,.13)" stroke="#ff6b5c" stroke-width="2" stroke-dasharray="6 4"/>
+            <circle cx="648" cy="418" r="38" fill="rgba(255,159,67,.13)" stroke="#ffb35c" stroke-width="2" stroke-dasharray="6 4"/>
+            <circle cx="402" cy="258" r="40" fill="rgba(255,159,67,.13)" stroke="#ffb35c" stroke-width="2" stroke-dasharray="6 4"/>
+            <g font-size="10">
+              <text x="245" y="248" fill="#ff9c8e" text-anchor="middle">水源保护区禁飞</text>
+              <text x="470" y="243" fill="#ff9c8e" text-anchor="middle">高邮站枢纽禁飞</text>
+              <text x="430" y="446" fill="#ff9c8e" text-anchor="middle">城区党政机关禁飞</text>
+              <text x="648" y="251" fill="#ffd5a6" text-anchor="middle">临东郊变限飞</text>
+              <text x="402" y="308" fill="#ffd5a6" text-anchor="middle">城区限飞</text>
+            </g>
+          </g>
+          <!-- 报备作业区图层 -->
+          <g id="layer-task">
+            <rect x="585" y="130" width="105" height="72" rx="8" fill="rgba(46,230,166,.16)" stroke="#2ee6a6" stroke-width="1.6"/>
+            <text x="637" y="160" fill="#6ff0ba" font-size="10" text-anchor="middle">三垛镇·稻田飞防</text>
+            <text x="637" y="175" fill="#8fdcbe" font-size="9" text-anchor="middle">作业中 · 820亩</text>
+            <rect x="540" y="300" width="112" height="68" rx="8" fill="rgba(0,212,255,.13)" stroke="#00d4ff" stroke-width="1.6"/>
+            <text x="596" y="330" fill="#6fe0ff" font-size="10" text-anchor="middle">卸甲镇·播种作业</text>
+            <text x="596" y="345" fill="#8fcdde" font-size="9" text-anchor="middle">已报备待作业</text>
+            <rect x="640" y="200" width="102" height="60" rx="8" fill="rgba(46,230,166,.12)" stroke="#8fe9c8" stroke-width="1.4"/>
+            <text x="691" y="226" fill="#8fe9c8" font-size="10" text-anchor="middle">甘垛镇·施肥</text>
+            <text x="691" y="240" fill="#8fdcbe" font-size="9" text-anchor="middle">已完成 · 1,210亩</text>
+          </g>
+          <!-- 感知设备图层 -->
+          <g id="layer-sensor">
+            <g class="pulse"><circle cx="470" cy="180" r="26" fill="none" stroke="#00d4ff" stroke-width="1" opacity=".6"/><circle cx="430" cy="392" r="24" fill="none" stroke="#00d4ff" stroke-width="1" opacity=".6"/><circle cx="245" cy="165" r="26" fill="none" stroke="#00d4ff" stroke-width="1" opacity=".6"/></g>
+            <g>
+              <rect x="238" y="158" width="14" height="14" rx="3" fill="#00d4ff"/>
+              <rect x="463" y="173" width="14" height="14" rx="3" fill="#00d4ff"/>
+              <rect x="423" y="385" width="14" height="14" rx="3" fill="#00d4ff"/>
+              <rect x="700" y="255" width="14" height="14" rx="3" fill="#7a8ba3"/>
+              <rect x="641" y="411" width="14" height="14" rx="3" fill="#ffd93d"/>
+            </g>
+            <g font-size="9" fill="#aee4f7">
+              <text x="245" y="150" text-anchor="middle">光电E-02</text>
+              <text x="477" y="211" text-anchor="middle">雷达R-01</text>
+              <text x="488" y="404" text-anchor="middle">频谱S-03</text>
+              <text x="738" y="276" text-anchor="middle">雷达R-04·离线</text>
+              <text x="682" y="444" text-anchor="middle">频谱S-06·告警</text>
+            </g>
+          </g>
+          <!-- 实时无人机图层 -->
+          <g id="layer-uav">
+            <path id="track1" d="M585,190 C620,160 660,175 690,150" fill="none" stroke="#2ee6a6" stroke-width="1.6" stroke-dasharray="5 4" opacity=".85"/>
+            <path id="track2" d="M540,345 C580,330 620,335 655,315" fill="none" stroke="#2ee6a6" stroke-width="1.6" stroke-dasharray="5 4" opacity=".85"/>
+            <g fill="#2ee6a6">
+              <circle cx="615" cy="173" r="6"/>
+              <circle cx="615" cy="173" r="11" fill="none" stroke="#2ee6a6" opacity=".5"/>
+              <text x="615" y="156" font-size="9" fill="#7ef2bd" text-anchor="middle">T50-A032·三垛</text>
+              <circle cx="590" cy="336" r="6"/>
+              <circle cx="590" cy="336" r="11" fill="none" opacity=".5"/>
+              <text x="590" y="320" font-size="9" text-anchor="middle">T25-B117·卸甲</text>
+              <!-- 报警目标 -->
+              <circle cx="446" cy="205" r="7" fill="#ff6b5c"/>
+              <circle cx="446" cy="205" r="13" fill="none" stroke="#ff6b5c" opacity=".5"/>
+              <circle cx="446" cy="205" r="20" fill="none" stroke="#ff6b5c" opacity=".25"/>
+              <text x="446" y="240" font-size="10" fill="#ff9c8e" text-anchor="middle">⚠ 闯入目标 DJI_12A3B7</text>
+            </g>
+          </g>
+          <!-- 镇名标注 -->
+          <g font-size="10" fill="#a9c3de">
+            <text x="700" y="120">临泽镇</text><text x="600" y="440">汤庄镇</text><text x="230" y="330">送桥镇</text><text x="180" y="400">菱塘回族乡</text><text x="540" y="90">界首镇</text><text x="620" y="260">三垛镇</text><text x="760" y="330">周山镇</text><text x="500" y="510">车逻镇</text>
+          </g>
+        </svg>
+        <!-- 地图统计 -->
+        <div class="map-stat">
+          <div class="ms-chip"><b>12</b>当前在飞目标</div>
+          <div class="ms-chip"><b class="green">3</b>作业中任务</div>
+          <div class="ms-chip"><b class="orange">6</b>禁飞/限飞区</div>
+          <div class="ms-chip"><b class="red pulse">1</b>待处置闯入</div>
+        </div>
+        <!-- 图层控制 -->
+        <div class="map-toolbar">
+          <div class="layer-check"><input type="checkbox" checked onchange="toggleLayer('layer-nofly',this)"><span>禁飞/限飞区</span></div>
+          <div class="layer-check"><input type="checkbox" checked onchange="toggleLayer('layer-sensor',this)"><span>感知设备</span></div>
+          <div class="layer-check"><input type="checkbox" checked onchange="toggleLayer('layer-task',this)"><span>报备作业区</span></div>
+          <div class="layer-check"><input type="checkbox" checked onchange="toggleLayer('layer-uav',this)"><span>实时目标</span></div>
+        </div>
+        <div class="map-legend">
+          <span class="lg-item"><span class="lg-dot" style="border:2px solid #ff6b5c;border-radius:50%"></span>禁飞区</span>
+          <span class="lg-item"><span class="lg-dot" style="border:2px solid #ffb35c;border-radius:50%"></span>限飞区</span>
+          <span class="lg-item"><span class="lg-dot" style="background:#00d4ff"></span>感知设备</span>
+          <span class="lg-item"><span class="lg-dot" style="background:#2ee6a6"></span>合规作业目标</span>
+          <span class="lg-item"><span class="lg-dot" style="background:#ff6b5c"></span>报警目标</span>
+          <span class="lg-item">▚ 报备作业区块</span>
+        </div>
+      </div>
+    </div>
+    <div class="col w450">
+      <div class="card">
+        <div class="card-header"><div class="title"><span class="dot"></span>实时预警事件</div><span class="more" onclick="switchPage('alarm')">查看全部 →</span></div>
+        <div class="card-body nopad" style="padding:8px 12px" id="dashAlarmList">
+          <div class="msg-item" onclick="openModal('m-alarm-detail')" style="border-bottom:1px solid rgba(0,212,255,.1);padding:10px 4px">
+            <div class="m-icon" style="background:rgba(231,76,60,.2)">🚨</div>
+            <div style="flex:1">
+              <div class="m-title" style="color:#fff">连淮扬镇铁路沿线禁飞区闯入 <span class="tag tag-danger">高级</span></div>
+              <div class="m-desc" style="color:rgba(255,255,255,.6)">多旋翼 DJI_12A3B7 ｜ 高度150m ｜ 距雷达R-01 2.3km ｜ 09:18:05</div>
+              <div style="margin-top:5px"><span class="tag tag-warn">待处置</span></div>
+            </div>
+          </div>
+          <div class="msg-item" onclick="openModal('m-alarm-detail')" style="border-bottom:1px solid rgba(0,212,255,.12);padding:10px 4px">
+            <div class="m-icon" style="background:rgba(255,159,67,.2)">⚠️</div>
+            <div style="flex:1">
+              <div class="m-title" style="color:#eaf4ff">高邮湖水源保护区接近预警 <span class="tag tag-warn">中级</span></div>
+              <div class="m-desc" style="color:rgba(255,255,255,.6)">多旋翼 DJI_88C2F0 ｜ 高度86m ｜ 距边界0.6km ｜ 10-10 15:42</div>
+              <div style="margin-top:5px"><span class="tag tag-info">处置中</span></div>
+            </div>
+          </div>
+          <div class="msg-item" onclick="openModal('m-alarm-detail')" style="padding:10px 4px">
+            <div class="m-icon" style="background:rgba(47,230,166,.16)">🛡️</div>
+            <div style="flex:1">
+              <div class="m-title" style="color:#eaf4ff">水源保护区敏感时段布控提醒 <span class="tag tag-info">低级</span></div>
+              <div class="m-desc" style="color:rgba(255,255,255,.6)">10-10 15:42 事件已由巡逻队处置完毕，飞手收到避让提醒，拟记录教育</div>
+              <div style="margin-top:5px"><span class="tag tag-success">已处置</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="title"><span class="dot"></span>今日作业动态</div><span class="more" onclick="switchPage('progress')">作业监管 →</span></div>
+        <div class="card-body" style="padding:14px 16px">
+          <div class="timeline">
+            <div class="tl-item done"><span class="tl-dot"></span>
+              <div class="tl-title">卸甲镇·稻茬小麦基施肥 <span class="tag tag-success">已归档</span></div>
+              <div class="tl-time">06:40 - 09:10 ｜ 飞手李卫东 ｜ 设备 T50-A031 ｜ 645亩</div>
+            </div>
+            <div class="tl-item doing"><span class="tl-dot"></span>
+              <div class="tl-title">三垛镇·水稻穗期稻飞虱防治 <span class="tag tag-info">作业中 72%</span></div>
+              <div class="tl-time">08:15 开始 ｜ 飞手张建国 ｜ 设备 T50-A032 ｜ 预计 11:00 完成</div>
+              <div class="progress-wrap" style="margin-top:6px"><div class="progress" style="flex:1"><div class="bar" style="width:72%"></div></div><span class="ptxt">620/860亩</span></div>
+            </div>
+            <div class="tl-item"><span class="tl-dot"></span>
+              <div class="tl-title">临泽镇·油菜田杂草防除 <span class="tag tag-gray">待开始 14:00</span></div>
+              <div class="tl-time">飞手陈海涛 ｜ 设备 V40-C007 ｜ 报备编号 BB-20261011-05</div>
+            </div>
+            <div class="tl-item"><span class="tl-dot"></span>
+              <div class="tl-title">菱塘乡·罗虾塘水体消毒辅助 <span class="tag tag-gray">待开始 15:30</span></div>
+              <div class="tl-time">飞手刘明辉 ｜ 设备 P100-D018 ｜ 报备编号 BB-20261011-07</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><div class="modal-mask" id="m-alarm-detail" onclick="maskClose(event,'m-alarm-detail')">
+  <div class="modal lg">
+    <div class="modal-header"><div class="modal-title"><span class="mt-icon">🚨</span>预警详情 · YJ-20261011-01（连淮扬镇铁路沿线禁飞区闯入）</div><button class="modal-close" onclick="closeModal('m-alarm-detail')">✕</button></div>
+    <div class="modal-body">
+      <div class="alarm-hot" style="margin-top:0">
+        <div class="ah-head">
+          <span class="ah-badge">🚨 高级</span>
+          <span class="ah-title">多旋翼无人机闯入铁路沿线禁飞区</span>
+          <span class="ah-time">系统自动生成 · 2026-10-11 09:18:05</span>
+        </div>
+        <div class="ah-grid">
+          <div class="ah-cell"><div class="c-label">发生时间</div><div class="c-value">2026-10-11 09:18:05</div></div>
+          <div class="ah-cell"><div class="c-label">位置</div><div class="c-value">连淮扬镇铁路甘垛段 K112+300 东侧</div></div>
+          <div class="ah-cell"><div class="c-label">经纬度</div><div class="c-value">32.7841N, 119.4652E</div></div>
+          <div class="ah-cell"><div class="c-label">高度 / 距离</div><div class="c-value">150m ｜ 距雷达 R-01 2.3km</div></div>
+          <div class="ah-cell"><div class="c-label">设备类型 / 编号</div><div class="c-value">多旋翼 / DJI_12A3B7</div></div>
+          <div class="ah-cell"><div class="c-label">探测来源</div><div class="c-value">雷达 R-01 + 光电 E-02 融合确认</div></div>
+          <div class="ah-cell"><div class="c-label">所属禁飞区</div><div class="c-value">连淮扬镇铁路沿线管控区（高）</div></div>
+          <div class="ah-cell"><div class="c-label">状态</div><div class="c-value" style="color:#e8871e">待处置</div></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px">
+        <div style="flex:1">
+          <div class="section-title" style="margin-top:0">多源融合探测记录</div>
+          <div class="timeline">
+            <div class="tl-item done"><span class="tl-dot"></span><div class="tl-title">雷达 R-01 首次捕获目标 <span class="tl-time">09:18:05</span></div><div class="tl-desc">方位 127°、距离 2.3km、高度 150m、径向速度 8m/s</div></div>
+            <div class="tl-item done"><span class="tl-dot"></span><div class="tl-title">轨迹外推判定闯入 <span class="tl-time">09:18:07</span></div><div class="tl-desc">AI 预测轨迹 12 秒后进入铁路管控区核心带</div></div>
+            <div class="tl-item done"><span class="tl-dot"></span><div class="tl-title">光电 E-02 识别确认 <span class="tl-time">09:18:11</span></div><div class="tl-desc">确认为四旋翼植保机型外观，非民航飞行器</div></div>
+            <div class="tl-item doing"><span class="tl-dot"></span><div class="tl-title">持续锁定跟踪中 <span class="tag tag-info">进行时</span></div><div class="tl-desc">目标进入悬停，光电持续取证拍摄，已留存视频 02:47</div></div>
+          </div>
+        </div>
+        <div style="width:300px;flex-shrink:0">
+          <div class="section-title" style="margin-top:0">自动触发的处置动作</div>
+          <div class="kv-list">
+            <div class="kv-row"><div class="k">工单生成</div><div class="v" style="color:#1e7d4a">✓ GD-20261011-01（09:18:09）</div></div>
+            <div class="kv-row"><div class="k">飞手推送</div><div class="v" style="color:#1e7d4a">✓ 附近3km飞手 12 人（小程序+短信）</div></div>
+            <div class="kv-row"><div class="k">部门同步</div><div class="v" style="color:#1e7d4a">✓ 公安 / 铁路派出所 / 应急局</div></div>
+            <div class="kv-row"><div class="k">管控措施</div><div class="v">声光警示（感知站）已开启</div></div>
+          </div>
+          <button class="btn btn-danger" style="width:100%;justify-content:center;margin-top:12px" onclick="closeModal('m-alarm-detail');openModal('m-handle')">进入协同处置</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer"><span class="mf-tip">证据自动保存：雷达轨迹 + 光电视频 + 声光记录，可移交执法</span><button class="btn btn-gray" onclick="closeModal('m-alarm-detail')">关闭</button><button class="btn btn-outline" onclick="alertTip('处置报告模板已生成，可补充后导出')">生成处置报告</button></div>
+  </div>
+</div><div class="modal-mask" id="m-handle" onclick="maskClose(event,'m-handle')">
+  <div class="modal lg">
+    <div class="modal-header"><div class="modal-title"><span class="mt-icon">🤝</span>协同处置 · 工单 GD-20261011-01（铁路禁飞区闯入）</div><button class="modal-close" onclick="closeModal('m-handle')">✕</button></div>
+    <div class="modal-body">
+      <div class="steps">
+        <div class="step done"><div class="s-dot">1</div><div class="s-name">闯入侦测</div></div>
+        <div class="step done"><div class="s-dot">2</div><div class="s-name">触发预警</div></div>
+        <div class="step done"><div class="s-dot">3</div><div class="s-name">推送飞手</div></div>
+        <div class="step done"><div class="s-dot">4</div><div class="s-name">同步部门</div></div>
+        <div class="step doing"><div class="s-dot">5</div><div class="s-name">任务下发</div></div>
+        <div class="step"><div class="s-dot">6</div><div class="s-name">处置反馈</div></div>
+      </div>
+      <div class="timeline">
+        <div class="tl-item done"><span class="tl-dot"></span><div class="tl-title">闯入侦测 · 雷达+光电融合确认 <span class="tl-time">09:18:05 ~ 09:18:11</span></div><div class="tl-desc">DJI_12A3B7 多旋翼，高度150m，距铁路管控区 2.3km，AI 预测 12 秒后进入核心带</div></div>
+        <div class="tl-item done"><span class="tl-dot"></span><div class="tl-title">触发预警 · 声光+多端弹窗+工单生成 <span class="tl-time">09:18:09</span></div><div class="tl-desc"><span class="tl-tag">监管大屏弹窗</span><span class="tl-tag">小程序强提醒</span><span class="tl-tag">短信 12 条</span>记录告警时间/位置/设备特征</div></div>
+        <div class="tl-item done"><span class="tl-dot"></span><div class="tl-title">推送飞手 · 附近 3km 12 人 <span class="tl-time">09:18:12</span></div><div class="tl-desc">推送内容含设备位置、距离、高度与预警级别，送达率 100%</div></div>
+        <div class="tl-item done"><span class="tl-dot"></span><div class="tl-title">同步部门 · 公安/铁路/应急 <span class="tl-time">09:18:15</span></div><div class="tl-desc">预警单推送至三方协同通道，高邮铁路派出所值班自动接单</div></div>
+        <div class="tl-item doing"><span class="tl-dot"></span><div class="tl-title">任务下发 · 路面巡逻队出动 <span class="tag tag-warn">当前环节</span></div><div class="tl-desc">按预案Ⅱ级下发处置任务：现场核实、劝离制止、固定证据。目标位置已实时下发至巡逻终端。</div></div>
+        <div class="tl-item"><span class="tl-dot"></span><div class="tl-title">处置反馈与归档</div><div class="tl-desc">待回传处置结果（已驱离 / 责令降落 / 需支援 / 移交执法），系统自动归档并生成报告</div></div>
+      </div>
+      <div class="section-title">处置结果登记</div>
+      <div class="form-grid">
+        <div class="form-item"><div class="f-label">处置结果 <span class="req">*</span></div>
+          <select class="sel" style="width:100%"><option>已驱离（教育提醒）</option><option>责令降落·配合核查</option><option>飞行中止·设备暂扣</option><option>需支援协助</option><option>移交执法立案</option></select>
+        </div>
+        <div class="form-item"><div class="f-label">现场核实飞手/持机人 <span class="req">*</span></div>
+          <select class="sel" style="width:100%"><option>已核实（非备案人员）</option><option>备案飞手（记违规一次）</option><option>未能现场核实</option></select>
+        </div>
+        <div class="form-item full"><div class="f-label">处置说明</div>
+          <textarea class="form-area" style="width:100%" placeholder="记录现场情况、当事人说明、处理措施执行情况"></textarea>
+        </div>
+        <div class="form-item full"><div class="f-label">证据附件</div>
+          <div style="border:1.5px dashed #c9d6e5;border-radius:10px;padding:14px;text-align:center;color:#8a97a8;font-size:12px;cursor:pointer" onclick="alertTip('已关联：光电视频02:47、雷达轨迹、现场照片3张')">📎 已自动关联光电取证视频、雷达轨迹，可补充现场照片</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <span class="mf-tip">超时未反馈将自动升级催办至分管领导</span>
+      <button class="btn btn-gray" onclick="closeModal('m-handle')">关闭</button>
+      <button class="btn btn-outline" onclick="alertTip('已催办处置责任人')">催办</button>
+      <button class="btn btn-success" onclick="alertTip('处置结果已登记，工单归档并生成事件报告');closeModal('m-handle')">提交反馈并归档</button>
+    </div>
+  </div>
+</div><div class="modal-mask" id="m-map-help" onclick="maskClose(event,'m-map-help')">
+  <div class="modal sm">
+    <div class="modal-header"><div class="modal-title"><span class="mt-icon">🗺️</span>监管一张图 · 制图说明</div><button class="modal-close" onclick="closeModal('m-map-help')">✕</button></div>
+    <div class="modal-body">
+      <div class="kv-list">
+        <div class="kv-row"><div class="k">底图</div><div class="v">高邮市域电子地图（示意轮廓，非测绘成果）</div></div>
+        <div class="kv-row"><div class="k">禁飞/限飞区</div><div class="v">按部门管控要求划定的电子围栏范围渲染</div></div>
+        <div class="kv-row"><div class="k">感知设备</div><div class="v">雷达 / 光电 / 频谱站点位置与覆盖半径</div></div>
+        <div class="kv-row"><div class="k">报备作业区</div><div class="v">当日已报备任务的地块边界与状态（待作业/作业中/已完成）</div></div>
+        <div class="kv-row"><div class="k">实时目标</div><div class="v">定位上报与感知探测融合的目标航迹，合规绿色、报警红色</div></div>
+        <div class="kv-row"><div class="k">图层控制</div><div class="v">右上角复选框可独立开关四个图层</div></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-gray" onclick="closeModal('m-map-help')">我知道了</button></div>
+  </div>
+</div><div class="modal-mask" id="m-ai" onclick="maskClose(event,'m-ai')">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title"><span class="mt-icon">🤖</span>AI 智能体小助手</div><button class="modal-close" onclick="closeModal('m-ai')">✕</button></div>
+    <div class="modal-body">
+      <div class="chat-wrap">
+        <div>
+          <div class="chat-role">AI 小助手（植保监管知识库 · 42 部法规 · 平台操作指引）</div>
+          <div class="chat-bubble chat-ai">您好，郭科长！我可以帮助您：检索法规条款、解读预警处置预案、查询主体底数、辅导错题知识点，也可以协助撰写处置报告。请问需要什么帮助？</div>
+        </div>
+        <div>
+          <div class="chat-role" style="text-align:right">郭建农</div>
+          <div class="chat-bubble chat-user">帮我查下本周临期证件有哪些，按企业汇总</div>
+        </div>
+        <div>
+          <div class="chat-role">AI 小助手</div>
+          <div class="chat-bubble chat-ai">本周 30 天内临期证件共 23 条，按企业汇总（前 5）：
+
+① 绿农飞防合作社 —— 5 条（三责险为主，最早 10-26 到期）
+② 云天植保合作社 —— 4 条（含 P100-D018 三责险 10-26 到期）
+③ 丰源植保合作社 —— 3 条（T50-A032 三责险 11-02 到期）
+④ 惠农航空植保公司 —— 3 条（含飞手李卫东 AOPA 证 11-08 到期）
+⑤ 邮城农业服务公司 —— 2 条
+
+⚠ 建议：绿农与临泽丰收两家已有过期未续记录，建议列入下月重点督办。是否一键推送催办？</div>
+        </div>
+        <div class="ai-chips">
+          <div class="ai-chip" onclick="alertTip('演示环境：催办提醒已批量推送')">一键推送催办</div>
+          <div class="ai-chip" onclick="alertTip('演示环境：汇总文件已生成')">导出汇总表</div>
+          <div class="ai-chip" onclick="alertTip('演示环境：AI 正在生成周报草稿…')">生成监管周报草稿</div>
+        </div>
+      </div>
+      <div class="chat-input-row">
+        <input class="form-input" placeholder="输入问题，如：昨天铁路段预警处置到什么环节了？">
+        <button class="btn btn-purple" onclick="alertTip('演示环境：AI 回复已生成')">发送</button>
+      </div>
+    </div>
+    <div class="modal-footer"><span class="mf-tip">基于平台数据与法规库实时检索</span><button class="btn btn-gray" onclick="closeModal('m-ai')">关闭</button></div>
+  </div>
+</div>
+<script>
+
+/* ================= 基础交互 ================= */
+
+// 菜单组展开/收起
+function toggleGroup(head){
+  var group = head.parentElement;
+  var groups = document.querySelectorAll('.menu-group');
+  // 切换当前组
+  group.classList.toggle('open');
+}
+
+// 页面切换
+function switchPage(pageId, el){
+  var pages = document.querySelectorAll('.page');
+  for(var i=0;i<pages.length;i++){ pages[i].classList.remove('show'); }
+  var target = document.getElementById('page-' + pageId);
+  if(target){ target.classList.add('show'); }
+
+  // 菜单高亮
+  var items = document.querySelectorAll('.menu-item');
+  for(var j=0;j<items.length;j++){ items[j].classList.remove('active'); }
+  if(el){ el.classList.add('active'); }
+  else{
+    var match = document.querySelector('.menu-item[data-page="'+pageId+'"]');
+    if(match){
+      match.classList.add('active');
+      // 展开其所属组
+      var g = match.closest('.menu-group');
+      if(g) g.classList.add('open');
+    }
+  }
+  window.scrollTo(0,0);
+  try{ history.replaceState(null,'','?page='+pageId); }catch(e){}
+}
+
+// 打开独立数据大屏（新窗口）
+function openScreen(name){
+  var items = document.querySelectorAll('.menu-item');
+  for(var i=0;i<items.length;i++){ items[i].classList.remove('active'); }
+  var el = document.querySelector('.menu-item[data-page="'+name+'"]');
+  if(el){
+    el.classList.add('active');
+    var g = el.closest('.menu-group');
+    if(g) g.classList.add('open');
+  }
+  var file = (name === 'dashboard') ? 'screen-dashboard.html' : 'screen-statsboard.html';
+  window.open(file, '_blank');
+}
+
+// 弹窗
+function openModal(id){
+  var m = document.getElementById(id);
+  if(m){ m.classList.add('show'); document.body.style.overflow='hidden'; }
+}
+function closeModal(id){
+  var m = document.getElementById(id);
+  if(m){ m.classList.remove('show'); document.body.style.overflow=''; }
+}
+function maskClose(e,id){
+  if(e.target === e.currentTarget){ closeModal(id); }
+}
+
+// 弹窗内 Tab
+function switchTab(el, paneId){
+  var wrap = el.parentElement;
+  var tabs = wrap.querySelectorAll('.tab-item');
+  for(var i=0;i<tabs.length;i++){ tabs[i].classList.remove('active'); }
+  el.classList.add('active');
+  // panes 与 tabs 同级容器
+  var container = wrap.parentElement;
+  var panes = container.querySelectorAll('.tab-pane');
+  for(var j=0;j<panes.length;j++){ panes[j].classList.remove('show'); }
+  var pane = document.getElementById(paneId);
+  if(pane){ pane.classList.add('show'); }
+}
+
+// 消息面板
+function toggleMsgPanel(e){
+  if(e) e.stopPropagation();
+  var p = document.getElementById('msgPanel');
+  p.classList.toggle('show');
+}
+function switchMsgTab(el, paneId){
+  var tabs = document.querySelectorAll('.msg-tab');
+  for(var i=0;i<tabs.length;i++){ tabs[i].classList.remove('active'); }
+  el.classList.add('active');
+  var panes = document.querySelectorAll('.msg-tab-pane');
+  for(var j=0;j<panes.length;j++){ panes[j].classList.remove('show'); }
+  var pane = document.getElementById(paneId);
+  if(pane){ pane.classList.add('show'); }
+}
+document.addEventListener('click', function(e){
+  var panel = document.getElementById('msgPanel');
+  var btn = document.querySelector('.msg-btn-wrap');
+  if(panel && panel.classList.contains('show') && btn && !btn.contains(e.target) && !panel.contains(e.target)){
+    panel.classList.remove('show');
+  }
+});
+
+// 地图图层
+function toggleLayer(layerId, cb){
+  var layer = document.getElementById(layerId);
+  if(layer){ layer.style.display = cb.checked ? '' : 'none'; }
+}
+
+// ESC 关闭弹窗
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){
+    var masks = document.querySelectorAll('.modal-mask.show');
+    for(var i=0;i<masks.length;i++){ masks[i].classList.remove('show'); }
+    document.body.style.overflow='';
+  }
+});
+
+// Toast 提示
+function alertTip(msg){
+  var wrap = document.querySelector('.toast-wrap');
+  if(!wrap){
+    wrap = document.createElement('div');
+    wrap.className = 'toast-wrap';
+    document.body.appendChild(wrap);
+  }
+  var t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = '<span class="t-ico">✔</span>' + msg;
+  wrap.appendChild(t);
+  setTimeout(function(){
+    t.style.transition = 'opacity .4s, transform .4s';
+    t.style.opacity = '0';
+    t.style.transform = 'translateY(-8px)';
+    setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 420);
+  }, 2600);
+}
+
+// 顶部日期
+(function(){
+  var d = new Date();
+  var weeks = ['日','一','二','三','四','五','六'];
+  var pad = function(n){ return n<10 ? '0'+n : ''+n; };
+  var txt = d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes())+' 星期'+weeks[d.getDay()];
+  var el = document.getElementById('headerDate');
+  if(el){ el.textContent = txt; }
+})();
+
+// 大屏实时时钟与日期刷新
+(function(){
+  function pad(n){ return n<10?'0'+n:''+n; }
+  function tick(){
+    var now = new Date();
+    var t = pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds());
+    var clocks = document.querySelectorAll('.screen-clock');
+    for(var i=0;i<clocks.length;i++){ clocks[i].textContent = t; }
+    var dstr = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' 星期'+['日','一','二','三','四','五','六'][now.getDay()];
+    var dates = document.querySelectorAll('.screen-date');
+    for(var j=0;j<dates.length;j++){ dates[j].textContent = dstr; }
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
+
+// 初始化：URL ?page= 支持与默认组展开
+(function(){
+  var params = new URLSearchParams(window.location.search);
+  var p = params.get('page');
+  if(p && document.getElementById('page-'+p)){
+    switchPage(p);
+  }
+})();
+
+</script>
+<script>
+function switchPage(pageId){ window.open('index.html?page=' + pageId, '_blank'); }
+</script>
+</body>
+</html>
