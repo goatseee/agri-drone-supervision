@@ -504,10 +504,20 @@ textarea.form-area{resize:vertical;min-height:70px;line-height:1.6}
 /* ---- 迷你趋势 sparkline ---- */
 .spark{display:block}
 .spark .sl{fill:none;stroke:#00d4ff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.spark .sa{fill:rgba(0,212,255,.13)}
-.spark.green .sl{stroke:#2fe6a6}.spark.green .sa{fill:rgba(47,230,166,.13)}
-.spark.orange .sl{stroke:#ffc07b}.spark.orange .sa{fill:rgba(255,192,123,.14)}
-.spark .sdot{fill:#00d4ff}
+.spark .sa,.spark polygon{fill:rgba(0,212,255,.22)}
+.spark.green .sl{stroke:#2fe6a6}
+.spark.green .sa,.spark.green polygon{fill:rgba(47,230,166,.22)}
+.spark.orange .sl{stroke:#ffc07b}
+.spark.orange .sa,.spark.orange polygon{fill:rgba(255,200,130,.34)}
+.spark .dot{fill:#00d4ff;stroke:rgba(255,255,255,.4);stroke-width:.8}
+.spark.green .dot{fill:#2fe6a6}
+.spark.orange .dot{fill:#ffc07b}
+/* 大屏 KPI 单位小字与标签亮度 */
+.screen-page .qs-val small{color:rgba(199,228,255,.85);font-weight:600;text-shadow:none;margin-left:1px}
+.screen-page .qs-label{color:rgba(255,255,255,.68)}
+.screen-page .qs-trend{font-size:11px;letter-spacing:.2px}
+/* 脉冲点行内对齐修正 */
+.pulse-dot{vertical-align:middle;margin:0 1px 2px 2px;box-sizing:content-box}
 /* KPI 内 sparkline 布局 */
 .screen-page .qs-item{display:flex;align-items:center}
 .screen-page .qs-body{flex:1;min-width:0}
@@ -646,8 +656,8 @@ textarea.form-area{resize:vertical;min-height:70px;line-height:1.6}
   <div class="menu-group open">
     <div class="menu-group-head" onclick="toggleGroup(this)"><span class="mi">🛰️</span>监管总览<span class="arrow">▾</span></div>
     <div class="menu-sub">
-      <div class="menu-item active" data-page="dashboard" onclick="openScreen('dashboard')">监管一张图<span class="tag tag-cyan" style="margin-left:6px">新窗口</span></div>
-      <div class="menu-item" data-page="stats-board" onclick="openScreen('stats-board')">数据看板<span class="tag tag-cyan" style="margin-left:6px">新窗口</span></div>
+      <div class="menu-item active" data-page="dashboard" onclick="openScreen('dashboard')">监管一张图</div>
+      <div class="menu-item" data-page="stats-board" onclick="openScreen('stats-board')">数据看板</div>
     </div>
   </div>
   <div class="menu-group open">
